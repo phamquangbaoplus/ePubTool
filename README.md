@@ -38,7 +38,7 @@ The library database is opened read-only, and export works from the Apple Books 
 Requires **Apple Silicon and macOS 27 or later**.
 
 1. Download the app DMG from [GitHub Releases](https://github.com/phamquangbaoplus/ePubTool/releases/latest).
-2. Open the DMG and drag **ePubTool.app** onto the **Applications** shortcut (`/Applications/ePubTool.app`). Wait for the copy to finish. The DMG includes **READ ME FIRST.txt** with the Terminal command and Full Disk Access instructions.
+2. Open the DMG and drag **ePubTool.app** onto the **Applications** shortcut (`/Applications/ePubTool.app`). Wait for the copy to finish. Follow the short setup instructions on the release page.
 3. Open **Terminal**, paste this command, and press Return:
 
 ```bash
@@ -82,26 +82,6 @@ Editing requires Calibre installed at `/Applications/calibre.app`, including its
 Choose **Edit** or **Edit Selected** to prepare separate EPUB copies and open them in Calibre. PDFs are skipped when editing a selection. Use **Show Edited Copy in Finder** to locate the working file.
 
 Edits are saved to the separate copy; they are not written back to Apple Books. **Export always reads the Apple Books original**, not the edited copy. Import an edited file into Apple Books manually if you want to use it there.
-
-## Build from source
-
-1. Clone or download this repository.
-2. Open `ePubTool.xcodeproj` in Xcode.
-3. Select the **ePubTool** scheme and **My Mac** destination.
-4. Choose your own signing team under **Signing & Capabilities** if required.
-5. Build and run with **⌘R**.
-
-Use an Xcode installation and macOS version compatible with the project’s configured SDK and deployment target. The app is written in Swift and SwiftUI and uses the system ZIP utility for repacking.
-
-## Automatic releases
-
-Every push to `main` runs [the release workflow](.github/workflows/release.yml). It builds the app, checks its signature and icon, packages a DMG with an Applications shortcut, installation instructions, and a SHA-256 checksum, and publishes a GitHub Release with generated release notes. No manual tag or version edit is required.
-
-Versions use `1.0.<GitHub run number>`; failed runs may leave gaps. Re-running a workflow keeps the same version and does not replace an already published release. You can also start the workflow manually from the Actions tab on `main`. Rapid pushes may replace a pending run; the newest pending commit will be built.
-
-Download builds from [Releases](https://github.com/phamquangbaoplus/ePubTool/releases/latest). Automated binaries currently require **Apple Silicon and macOS 27 or later**. They are ad-hoc signed, not Developer ID signed or notarized; macOS Gatekeeper may block them.
-
-The workflow uses GitHub's built-in `GITHUB_TOKEN` with `contents: write`; no personal access token or Apple certificate is required for this release mode. GitHub Actions must be enabled for the repository, and repository rules must permit the workflow to create release tags. Developer ID signing and notarization require a separate Apple credential setup.
 
 ## Scope and limitations
 

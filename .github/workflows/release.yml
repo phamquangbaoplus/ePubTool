@@ -52,6 +52,9 @@ jobs:
             CONFIGURATION_BUILD_DIR="$RUNNER_TEMP/release-build" \
             build
 
+      - name: Install DMG packaging tool
+        run: brew install create-dmg
+
       - name: Verify and package app
         shell: bash
         run: |
@@ -63,36 +66,23 @@ jobs:
           mkdir -p dist
           archive="ePubTool-${TAG}-macOS-arm64.dmg"
           bash scripts/package-dmg.sh "$app" "dist/$archive"
-          (cd dist && shasum -a 256 "$archive" > SHA256SUMS.txt)
           cat > dist/release-notes.md <<NOTES
-          Automated build from commit ${GITHUB_SHA}.
-
-          Download **$archive**, open it, and drag ePubTool.app onto Applications.
-          Open **READ ME FIRST.txt** inside the DMG for setup instructions.
-
-          - Requires **macOS 27 or later** and **Apple Silicon**.
-          - Ad-hoc signed; not Developer ID signed or notarized by Apple. Gatekeeper may block the downloaded app.
-          - SHA-256 checksum is included in SHA256SUMS.txt.
+          Download **[$archive](https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/$archive)** — Apple Silicon, macOS 27+.
           NOTES
           cat >> dist/release-notes.md <<'INSTALL'
 
-          ### First launch
-
-          After moving ePubTool.app to /Applications, open Terminal and run:
+          ### Install
+          1. Open the DMG and drag **ePubTool** into **Applications**.
+          2. Open Terminal and run:
 
           ```bash
           xattr -dr com.apple.quarantine "/Applications/ePubTool.app" && open "/Applications/ePubTool.app"
           ```
 
-          Run this only for a download from this repository that you trust. It removes download quarantine from ePubTool only; it does not notarize the app or disable Gatekeeper system-wide. You may need to repeat it after installing an update.
+          3. In **System Settings → Privacy & Security → Full Disk Access**, add **/Applications/ePubTool.app** and enable it.
+          4. Quit ePubTool (⌘Q), reopen it from Applications, then click **Refresh**. Eject the DMG.
 
-          ### Required: Full Disk Access
-
-          Open **System Settings → Privacy & Security → Full Disk Access**, click **+**, select **/Applications/ePubTool.app**, and enable its switch. Quit ePubTool completely and reopen it, then click **Refresh** in Manage Apple Books. This permission is required to read the Apple Books library; the Terminal command does not grant it.
-
-          If access stops working after an update, remove the old Full Disk Access entry and add the installed app again.
-
-          If the app is still blocked, try opening it once, then use System Settings → Privacy & Security → Open Anyway for ePubTool, if available. See the [installation guide](https://github.com/phamquangbaoplus/ePubTool#install-a-release) for troubleshooting and Apple Books permissions.
+          Not notarized by Apple. Run the command only for a download you trust; it removes quarantine for this app only and does not grant Full Disk Access.
           INSTALL
 
       - name: Publish GitHub Release
@@ -107,8 +97,8 @@ jobs:
             fi
           else
             gh release create "$TAG" --target "$GITHUB_SHA" \
-              --title "ePubTool $TAG" --draft --generate-notes \
+              --title "ePubTool $TAG" --draft \
               --notes-file dist/release-notes.md
           fi
-          gh release upload "$TAG" "dist/ePubTool-${TAG}-macOS-arm64.dmg" dist/SHA256SUMS.txt --clobber
+          gh release upload "$TAG" "dist/ePubTool-${TAG}-macOS-arm64.dmg" --clobber
           gh release edit "$TAG" --draft=false --latest
