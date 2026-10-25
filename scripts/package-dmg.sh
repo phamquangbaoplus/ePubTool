@@ -29,7 +29,7 @@ create-dmg \
     --volicon "$app/Contents/Resources/AppIcon.icns" \
     --background "$staging/background.png" \
     --window-pos 200 120 \
-    --window-size 660 440 \
+    --window-size 660 520 \
     --icon-size 100 \
     --text-size 14 \
     --icon "ePubTool.app" 170 210 \
