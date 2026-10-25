@@ -13,7 +13,7 @@ final class AppleBooksViewModel {
     var isLoading = false
     var isWorking = false
     var exportStartedAt: Date?
-    var status = "Ready to load Apple Books automatically."
+    var status = String(localized: "Ready to load Apple Books automatically.")
     var completed = 0
     var total = 0
     var lastExport: URL?
@@ -39,26 +39,26 @@ final class AppleBooksViewModel {
         scanTask = Task {
             defer { isLoading = false }
             do {
-                console.log("INFO", "Reading Apple Books: \(folder.path)")
+                console.log("INFO", String(localized: "Reading Apple Books: \(folder.path)"))
                 try await service.scan(folder, log: { level, message in
                     await console.log(level, message)
                 }) { [weak self] books, total in
                     await self?.receive(books, total: total)
                 }
-                status = "Loaded \(books.count) books."
+                status = String(localized: "Loaded \(books.count) books.")
                 console.log("SUCCESS", status)
             } catch is CancellationError {
-                status = "Indexing stopped. \(books.count) books available."
+                status = String(localized: "Indexing stopped. \(books.count) books available.")
             } catch {
                 status = error.localizedDescription
-                console.log("ERROR", "Cannot read library: \(error.localizedDescription). Check that Apple Books is installed and ePubTool has Full Disk Access.")
+                console.log("ERROR", String(localized: "Cannot read library: \(error.localizedDescription). Check that Apple Books is installed and ePubTool has Full Disk Access."))
             }
         }
     }
 
     private func receive(_ books: [LibraryBook], total: Int) {
         self.books = books
-        status = "Loaded catalog: \(total) of \(books.count)…"
+        status = String(localized: "Loaded catalog: \(total) of \(books.count)…")
         applyFilter()
     }
 
@@ -78,7 +78,7 @@ final class AppleBooksViewModel {
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.canCreateDirectories = true
-        panel.prompt = "Export Here"
+        panel.prompt = String(localized: "Export Here")
         panel.directoryURL = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first
         guard await panel.begin() == .OK, let destination = panel.url else { return }
         exportStartedAt = Date()
@@ -92,9 +92,9 @@ final class AppleBooksViewModel {
             let name = book.exportFilename
             do {
                 guard outputNames.insert(name.precomposedStringWithCanonicalMapping.lowercased()).inserted else {
-                    throw RepackError.invalid("Duplicate export filename in this batch: \(name)")
+                    throw RepackError.invalid(String(localized: "Duplicate export filename in this batch: \(name)"))
                 }
-                status = "Exporting \(completed + 1)/\(total): \(book.title)"
+                status = String(localized: "Exporting \(completed + 1)/\(total): \(book.title)")
                 _ = try await service.export(book, to: destination, progress: { [weak self] message in
                     await self?.setExportStatus(message)
                 }) { level, message in
@@ -102,12 +102,12 @@ final class AppleBooksViewModel {
                 }
                 succeeded += 1
             } catch {
-                console.log("ERROR", "\(book.title): \(error.localizedDescription)")
+                console.log("ERROR", String(localized: "\(book.title): \(error.localizedDescription)"))
             }
             completed += 1
         }
         lastExport = destination
-        status = "Export: \(succeeded) succeeded · \(total - succeeded) failed."
+        status = String(localized: "Export: \(succeeded) succeeded · \(total - succeeded) failed.")
         console.log("INFO", status)
     }
 
@@ -136,20 +136,20 @@ final class AppleBooksViewModel {
                 try await openEditor(book, console: console)
                 succeeded += 1
             } catch {
-                console.log("ERROR", "\(book.title): \(error.localizedDescription)")
+                console.log("ERROR", String(localized: "\(book.title): \(error.localizedDescription)"))
             }
             completed += 1
         }
-        status = "Edit: \(succeeded) opened · \(total - succeeded) failed."
+        status = String(localized: "Edit: \(succeeded) opened · \(total - succeeded) failed.")
         console.log("INFO", status)
     }
 
     private func openEditor(_ book: LibraryBook, console: ConsoleViewModel) async throws {
         let executable = URL(fileURLWithPath: "/Applications/calibre.app/Contents/MacOS/ebook-edit")
         guard FileManager.default.isExecutableFile(atPath: executable.path) else {
-            throw RepackError.invalid("Calibre ebook-edit was not found in /Applications/calibre.app.")
+            throw RepackError.invalid(String(localized: "Calibre ebook-edit was not found in /Applications/calibre.app."))
         }
-        status = "Preparing editable copy: \(book.title)…"
+        status = String(localized: "Preparing editable copy: \(book.title)…")
         let copy: URL
         if let existing = editedCopies[book.id], FileManager.default.fileExists(atPath: existing.path) {
             copy = existing
@@ -167,13 +167,13 @@ final class AppleBooksViewModel {
             let code = process.terminationStatus
             Task { @MainActor in
                 self?.editors[id] = nil
-                if code != 0 { console.log("ERROR", "Calibre exited with status \(code).") }
+                if code != 0 { console.log("ERROR", String(localized: "Calibre exited with status \(code).")) }
             }
         }
         console.log("EXEC", "\(executable.path) \(String(reflecting: copy.path))")
         try process.run()
         editors[id] = process
-        status = "Opened editable copy in Calibre."
-        console.log("INFO", "Edits are saved in: \(copy.path). Apple Books originals are unchanged.")
+        status = String(localized: "Opened editable copy in Calibre.")
+        console.log("INFO", String(localized: "Edits are saved in: \(copy.path). Apple Books originals are unchanged."))
     }
 }

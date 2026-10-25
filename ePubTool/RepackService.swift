@@ -16,47 +16,47 @@ actor RepackService {
         let fm = FileManager.default
         let access = source.startAccessingSecurityScopedResource()
         defer { if access { source.stopAccessingSecurityScopedResource() } }
-        await log("INFO", "Validating ePub structure...")
+        await log("INFO", String(localized: "Validating ePub structure..."))
         guard try source.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true else {
-            throw RepackError.invalid("Input must be an unpacked ePub directory.")
+            throw RepackError.invalid(String(localized: "Input must be an unpacked ePub directory."))
         }
         let resolvedSource = source.resolvingSymlinksInPath().standardizedFileURL.path
         let resolvedDestination = destination.resolvingSymlinksInPath().standardizedFileURL.path
         guard resolvedDestination != resolvedSource,
               !resolvedDestination.hasPrefix(resolvedSource + "/") else {
-            throw RepackError.invalid("Choose an output folder outside the source book.")
+            throw RepackError.invalid(String(localized: "Choose an output folder outside the source book."))
         }
 
         let workspace = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         let staging = workspace.appendingPathComponent("book")
         try fm.createDirectory(at: staging, withIntermediateDirectories: true)
         defer { try? fm.removeItem(at: workspace) }
-        await log("INFO", "Copying book contents; source files are preserved.")
+        await log("INFO", String(localized: "Copying book contents; source files are preserved."))
         try copyContents(from: source, to: staging)
         let container = staging.appendingPathComponent("META-INF/container.xml")
         guard fm.fileExists(atPath: container.path) else {
-            throw RepackError.invalid("Missing META-INF/container.xml.")
+            throw RepackError.invalid(String(localized: "Missing META-INF/container.xml."))
         }
         let document = try XMLDocument(contentsOf: container, options: [.nodeLoadExternalEntitiesNever])
         let roots = try document.nodes(forXPath: "/*[local-name()='container']/*[local-name()='rootfiles']/*[local-name()='rootfile']")
-        guard !roots.isEmpty else { throw RepackError.invalid("container.xml has no package document.") }
+        guard !roots.isEmpty else { throw RepackError.invalid(String(localized: "container.xml has no package document.")) }
         for root in roots {
             guard let path = (root as? XMLElement)?.attribute(forName: "full-path")?.stringValue,
                   !path.isEmpty, !path.hasPrefix("/"),
                   !path.split(separator: "/").contains(".."),
                   fm.fileExists(atPath: staging.appendingPathComponent(path).path) else {
-                throw RepackError.invalid("container.xml references an invalid or missing package document.")
+                throw RepackError.invalid(String(localized: "container.xml references an invalid or missing package document."))
             }
         }
         // EPUB requires this exact content, stored first and without compression.
         let mimetype = staging.appendingPathComponent("mimetype")
         let expected = Data("application/epub+zip".utf8)
         if (try? Data(contentsOf: mimetype)) != expected {
-            await log("WARNING", "Creating a canonical mimetype in the output copy.")
+            await log("WARNING", String(localized: "Creating a canonical mimetype in the output copy."))
         }
         try expected.write(to: mimetype)
         if fm.fileExists(atPath: staging.appendingPathComponent("META-INF/encryption.xml").path) {
-            await log("WARNING", "Book declares encrypted resources. Repacking does not remove DRM.")
+            await log("WARNING", String(localized: "Book declares encrypted resources. Repacking does not remove DRM."))
         }
         let archive = workspace.appendingPathComponent("result.epub")
         try await run(["-X", "-0", archive.path, "mimetype"], in: staging, log: log)
@@ -73,14 +73,14 @@ actor RepackService {
         if fm.fileExists(atPath: output.path) {
             let values = try output.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey])
             guard values.isRegularFile == true, values.isSymbolicLink != true else {
-                throw RepackError.invalid("Output path is not a regular file: \(output.path)")
+                throw RepackError.invalid(String(localized: "Output path is not a regular file: \(output.path)"))
             }
-            await log("INFO", "Overwriting existing ePub: \(output.path)")
+            await log("INFO", String(localized: "Overwriting existing ePub: \(output.path)"))
             _ = try fm.replaceItemAt(output, withItemAt: replacement)
         } else {
             try fm.moveItem(at: replacement, to: output)
         }
-        await log("SUCCESS", "ePub repacked successfully at: \(output.path)")
+        await log("SUCCESS", String(localized: "ePub repacked successfully at: \(output.path)"))
         return output
     }
 
@@ -95,7 +95,7 @@ actor RepackService {
             if excluded.contains(name) || name.hasPrefix("._") { continue }
             let values = try item.resourceValues(forKeys: [.isDirectoryKey, .isSymbolicLinkKey])
             guard values.isSymbolicLink != true else {
-                throw RepackError.invalid("Symbolic links are not supported: \(item.path)")
+                throw RepackError.invalid(String(localized: "Symbolic links are not supported: \(item.path)"))
             }
             let target = destination.appendingPathComponent(name)
             if values.isDirectory == true {
@@ -129,7 +129,7 @@ actor RepackService {
         let output = String(decoding: data, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
         if !output.isEmpty { await log("INFO", output) }
         guard process.terminationStatus == 0 else {
-            throw RepackError.invalid("zip exited with status \(process.terminationStatus): \(output)")
+            throw RepackError.invalid(String(localized: "zip exited with status \(process.terminationStatus): \(output)"))
         }
     }
 }

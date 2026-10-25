@@ -25,15 +25,15 @@ struct AppleBooksView: View {
             }
             Table(model.filtered, selection: $model.selection) {
                 TableColumn("Title") { book in
-                    CopyableBookText(text: book.title, field: "title")
+                    CopyableBookText(text: book.title, copyHelp: "Double-click to copy title", copyAction: "Copy title")
                 }
                 .width(min: 140, ideal: 260)
                 TableColumn("Author") { book in
-                    CopyableBookText(text: book.author, field: "author")
+                    CopyableBookText(text: book.author, copyHelp: "Double-click to copy author", copyAction: "Copy author")
                 }
                 .width(min: 90, ideal: 150)
                 TableColumn("Format", value: \.format)
-                    .width(55)
+                    .width(min: 80, ideal: 100)
                 TableColumn("Actions") { book in
                     HStack(spacing: 8) {
                         Button {
@@ -68,11 +68,11 @@ struct AppleBooksView: View {
                         .help(book.url.path)
                     }
                 }
-                .width(110)
+                .width(min: 110, ideal: 130)
             }
             .overlay {
                 if model.filtered.isEmpty && !model.isLoading {
-                    ContentUnavailableView(model.books.isEmpty ? "No books loaded" : "No matching books",
+                    ContentUnavailableView(model.books.isEmpty ? LocalizedStringKey("No books loaded") : LocalizedStringKey("No matching books"),
                                            systemImage: "books.vertical")
                         .allowsHitTesting(false)
                 }
@@ -91,7 +91,8 @@ struct AppleBooksView: View {
 
 private struct CopyableBookText: View {
     let text: String
-    let field: String
+    let copyHelp: LocalizedStringKey
+    let copyAction: LocalizedStringKey
     @State private var copyID: UUID?
 
     var body: some View {
@@ -105,8 +106,8 @@ private struct CopyableBookText: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
         .simultaneousGesture(TapGesture(count: 2).onEnded { copy() })
-        .help("Double-click to copy \(field)")
-        .accessibilityAction(named: Text("Copy \(field)")) { copy() }
+        .help(Text(copyHelp))
+        .accessibilityAction(named: Text(copyAction)) { copy() }
         .task(id: copyID) {
             guard copyID != nil else { return }
             do {

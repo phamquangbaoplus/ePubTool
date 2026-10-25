@@ -1,131 +1,916 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "%lld books · %lld selected" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld books · %2$lld selected"
+  "sourceLanguage": "en",
+  "strings": {
+    "%@: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@: %2$@"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@: %2$@"
           }
         }
       }
     },
-    "%lld of %lld processed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld of %2$lld processed"
+    "%lld books · %lld selected": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld books · %2$lld selected"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld sách · Đã chọn %2$lld"
           }
         }
       }
     },
-    "Actions" : {
-
+    "%lld files have no unambiguous catalog match; showing filenames without reading file metadata.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld tệp không có kết quả khớp rõ ràng trong danh mục; đang hiển thị tên tệp mà không đọc siêu dữ liệu tệp."
+          }
+        }
+      }
     },
-    "Author" : {
-
+    "%lld of %lld processed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld of %2$lld processed"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã xử lý %1$lld trên %2$lld"
+          }
+        }
+      }
     },
-    "Clear Log" : {
-
+    "Actions": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tác vụ"
+          }
+        }
+      }
     },
-    "Collapse Console" : {
-
+    "Author": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tác giả"
+          }
+        }
+      }
     },
-    "Console" : {
-
+    "Book declares encrypted resources. Repacking does not remove DRM.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sách khai báo tài nguyên đã mã hóa. Đóng gói lại không gỡ bỏ DRM."
+          }
+        }
+      }
     },
-    "Copied" : {
-
+    "Calibre ebook-edit was not found in /Applications/calibre.app.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không tìm thấy ebook-edit của Calibre trong /Applications/calibre.app."
+          }
+        }
+      }
     },
-    "Copy %@" : {
-
+    "Calibre exited with status %d.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calibre đã thoát với mã trạng thái %d."
+          }
+        }
+      }
     },
-    "Copy Log" : {
-
+    "Cannot locate an accessible BKLibrary*.sqlite. Check that Apple Books is installed and ePubTool has Full Disk Access, then refresh. %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể định vị tệp BKLibrary*.sqlite có thể truy cập. Hãy kiểm tra xem Apple Books đã được cài đặt và ePubTool có Quyền truy cập toàn bộ đĩa chưa, sau đó làm mới. %@"
+          }
+        }
+      }
     },
-    "Deselect All" : {
-
+    "Cannot open Books database read-only: %@. Check file access permissions.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể mở cơ sở dữ liệu Books ở chế độ chỉ đọc: %@. Hãy kiểm tra quyền truy cập tệp."
+          }
+        }
+      }
     },
-    "Double-click to copy %@" : {
-
+    "Cannot read library: %@. Check that Apple Books is installed and ePubTool has Full Disk Access.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không thể đọc thư viện: %@. Hãy kiểm tra xem Apple Books đã được cài đặt và ePubTool có Quyền truy cập toàn bộ đĩa chưa."
+          }
+        }
+      }
     },
-    "Edit" : {
-
+    "Checking iCloud availability: %@…": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang kiểm tra khả dụng iCloud: %@…"
+          }
+        }
+      }
     },
-    "Edit %@" : {
-
+    "Choose an export folder outside the Apple Books source folder.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn một thư mục xuất nằm ngoài thư mục nguồn của Apple Books."
+          }
+        }
+      }
     },
-    "Edit opens a separate copy in Calibre. Export reads the Apple Books original. Existing export files are overwritten." : {
-
+    "Choose an output folder outside the source book.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn một thư mục đầu ra nằm ngoài sách nguồn."
+          }
+        }
+      }
     },
-    "Edit Selected (%lld)" : {
-
+    "Clear Log": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xóa nhật ký"
+          }
+        }
+      }
     },
-    "ePubTool" : {
-
+    "Collapse Console": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thu gọn bảng điều khiển"
+          }
+        }
+      }
     },
-    "Expand Console" : {
-
+    "Console": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bảng điều khiển"
+          }
+        }
+      }
     },
-    "Export" : {
-
+    "Copied": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã sao chép"
+          }
+        }
+      }
     },
-    "Export %@" : {
-
+    "Copy Log": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sao chép nhật ký"
+          }
+        }
+      }
     },
-    "Export book" : {
-
+    "Copy author": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sao chép tác giả"
+          }
+        }
+      }
     },
-    "Export Selected (%lld)" : {
-
+    "Copy title": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sao chép tiêu đề"
+          }
+        }
+      }
     },
-    "Format" : {
-
+    "Copying book contents; source files are preserved.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang sao chép nội dung sách; các tệp nguồn được giữ nguyên."
+          }
+        }
+      }
     },
-    "Manage Apple Books" : {
-
+    "Creating a canonical mimetype in the output copy.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang tạo mimetype chuẩn trong bản sao đầu ra."
+          }
+        }
+      }
     },
-    "No books loaded" : {
-
+    "Deselect All": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bỏ chọn tất cả"
+          }
+        }
+      }
     },
-    "No matching books" : {
-
+    "Double-click to copy author": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bấm đúp để sao chép tác giả"
+          }
+        }
+      }
     },
-    "Open an editable EPUB copy in Calibre" : {
-
+    "Double-click to copy title": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bấm đúp để sao chép tiêu đề"
+          }
+        }
+      }
     },
-    "Open selected EPUBs in Calibre; PDFs are skipped" : {
-
+    "Downloading from iCloud: %@…": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang tải về từ iCloud: %@…"
+          }
+        }
+      }
     },
-    "Refresh" : {
-
+    "Duplicate export filename in this batch: %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tên tệp xuất bị trùng lặp trong đợt này: %@"
+          }
+        }
+      }
     },
-    "Search title, author or filename…" : {
-
+    "Edit": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chỉnh sửa"
+          }
+        }
+      }
     },
-    "Select a tool" : {
-
+    "Edit %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chỉnh sửa %@"
+          }
+        }
+      }
     },
-    "Select All Results" : {
-
+    "Edit Selected (%lld)": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chỉnh sửa mục đã chọn (%lld)"
+          }
+        }
+      }
     },
-    "Show Edited Copy in Finder" : {
-
+    "Edit opens a separate copy in Calibre. Export reads the Apple Books original. Existing export files are overwritten.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chỉnh sửa sẽ mở một bản sao riêng trong Calibre. Xuất sẽ đọc bản gốc từ Apple Books. Các tệp xuất hiện có sẽ bị ghi đè."
+          }
+        }
+      }
     },
-    "Show Exports" : {
-
+    "Edit: %lld opened · %lld failed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Edit: %1$lld opened · %2$lld failed."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chỉnh sửa: %1$lld đã mở · %2$lld thất bại."
+          }
+        }
+      }
     },
-    "Show Original in Finder" : {
-
+    "Edits are saved in: %@. Apple Books originals are unchanged.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bản chỉnh sửa được lưu tại: %@. Bản gốc trong Apple Books không thay đổi."
+          }
+        }
+      }
     },
-    "Stop" : {
-
+    "Expand Console": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở rộng bảng điều khiển"
+          }
+        }
+      }
     },
-    "Title" : {
-
+    "Export": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xuất"
+          }
+        }
+      }
+    },
+    "Export %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xuất %@"
+          }
+        }
+      }
+    },
+    "Export Here": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xuất tại đây"
+          }
+        }
+      }
+    },
+    "Export Selected (%lld)": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xuất mục đã chọn (%lld)"
+          }
+        }
+      }
+    },
+    "Export book": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xuất sách"
+          }
+        }
+      }
+    },
+    "Export: %lld succeeded · %lld failed.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Export: %1$lld succeeded · %2$lld failed."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xuất: %1$lld thành công · %2$lld thất bại."
+          }
+        }
+      }
+    },
+    "Exported original %@: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Exported original %1$@: %2$@"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã xuất bản gốc %1$@: %2$@"
+          }
+        }
+      }
+    },
+    "Exporting %lld/%lld: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Exporting %1$lld/%2$lld: %3$@"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang xuất %1$lld/%2$lld: %3$@"
+          }
+        }
+      }
+    },
+    "Exporting: %@…": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang xuất: %@…"
+          }
+        }
+      }
+    },
+    "Format": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Định dạng"
+          }
+        }
+      }
+    },
+    "Indexing stopped. %lld books available.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã dừng lập chỉ mục. Hiện có %lld cuốn sách."
+          }
+        }
+      }
+    },
+    "Input must be an unpacked ePub directory.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đầu vào phải là một thư mục ePub đã giải nén."
+          }
+        }
+      }
+    },
+    "Loaded %lld books.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã tải %lld sách."
+          }
+        }
+      }
+    },
+    "Loaded catalog: %lld of %lld…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Loaded catalog: %1$lld of %2$lld…"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã tải danh mục: %1$lld trên %2$lld…"
+          }
+        }
+      }
+    },
+    "Manage Apple Books": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quản lý Apple Books"
+          }
+        }
+      }
+    },
+    "Missing META-INF/container.xml.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thiếu META-INF/container.xml."
+          }
+        }
+      }
+    },
+    "No books loaded": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chưa tải sách nào"
+          }
+        }
+      }
+    },
+    "No matching books": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không tìm thấy sách phù hợp"
+          }
+        }
+      }
+    },
+    "Open an editable EPUB copy in Calibre": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở một bản sao EPUB có thể chỉnh sửa trong Calibre"
+          }
+        }
+      }
+    },
+    "Open selected EPUBs in Calibre; PDFs are skipped": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mở các tệp EPUB đã chọn trong Calibre; bỏ qua các tệp PDF"
+          }
+        }
+      }
+    },
+    "Opened editable copy in Calibre.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã mở bản sao có thể chỉnh sửa trong Calibre."
+          }
+        }
+      }
+    },
+    "Output is not a regular file: %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đầu ra không phải là một tệp thông thường: %@"
+          }
+        }
+      }
+    },
+    "Output path is not a regular file: %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đường dẫn đầu ra không phải là một tệp thông thường: %@"
+          }
+        }
+      }
+    },
+    "Overwriting existing ePub: %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang ghi đè ePub hiện có: %@"
+          }
+        }
+      }
+    },
+    "Preparing editable copy: %@…": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang chuẩn bị bản sao có thể chỉnh sửa: %@…"
+          }
+        }
+      }
+    },
+    "Read %lld catalog rows; matched %lld/%lld source files.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Read %1$lld catalog rows; matched %2$lld/%3$lld source files."
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã đọc %1$lld hàng danh mục; khớp %2$lld/%3$lld tệp nguồn."
+          }
+        }
+      }
+    },
+    "Reading Apple Books: %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang đọc Apple Books: %@"
+          }
+        }
+      }
+    },
+    "Reading catalog: %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang đọc danh mục: %@"
+          }
+        }
+      }
+    },
+    "Ready to load Apple Books automatically.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sẵn sàng tự động tải Apple Books."
+          }
+        }
+      }
+    },
+    "Refresh": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Làm mới"
+          }
+        }
+      }
+    },
+    "Search title, author or filename…": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tìm tiêu đề, tác giả hoặc tên tệp…"
+          }
+        }
+      }
+    },
+    "Select All Results": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn tất cả kết quả"
+          }
+        }
+      }
+    },
+    "Select a tool": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn một công cụ"
+          }
+        }
+      }
+    },
+    "Show Edited Copy in Finder": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hiển thị bản sao đã chỉnh sửa trong Finder"
+          }
+        }
+      }
+    },
+    "Show Exports": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hiển thị mục đã xuất"
+          }
+        }
+      }
+    },
+    "Show Original in Finder": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hiển thị bản gốc trong Finder"
+          }
+        }
+      }
+    },
+    "Stop": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dừng"
+          }
+        }
+      }
+    },
+    "Symbolic links are not supported: %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không hỗ trợ liên kết biểu tượng: %@"
+          }
+        }
+      }
+    },
+    "Title": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiêu đề"
+          }
+        }
+      }
+    },
+    "Unsupported Books database schema. Expected ZBKLIBRARYASSET with ZPATH, ZTITLE and ZAUTHOR; found: %@.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lược đồ cơ sở dữ liệu Books không được hỗ trợ. Cần có ZBKLIBRARYASSET với ZPATH, ZTITLE và ZAUTHOR; tìm thấy: %@."
+          }
+        }
+      }
+    },
+    "Validating ePub structure...": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang xác thực cấu trúc ePub..."
+          }
+        }
+      }
+    },
+    "Waiting for iCloud download: %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang chờ tải về từ iCloud: %@"
+          }
+        }
+      }
+    },
+    "container.xml has no package document.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "container.xml không có tài liệu gói (package document)."
+          }
+        }
+      }
+    },
+    "container.xml references an invalid or missing package document.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "container.xml tham chiếu đến tài liệu gói không hợp lệ hoặc bị thiếu."
+          }
+        }
+      }
+    },
+    "ePub repacked successfully at: %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã đóng gói lại ePub thành công tại: %@"
+          }
+        }
+      }
+    },
+    "ePubTool": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ePubTool"
+          }
+        }
+      }
+    },
+    "iCloud download ready: %@": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tệp tải về từ iCloud đã sẵn sàng: %@"
+          }
+        }
+      }
+    },
+    "iCloud download timed out for %@. Check your connection and try exporting again.": {
+      "localizations": {
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã hết thời gian chờ tải về từ iCloud cho %@. Hãy kiểm tra kết nối mạng và thử xuất lại."
+          }
+        }
+      }
+    },
+    "zip exited with status %d: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "zip exited with status %1$d: %2$@"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "zip đã thoát với mã trạng thái %1$d: %2$@"
+          }
+        }
+      }
     }
   },
-  "version" : "1.3"
+  "version": "1.3"
 }

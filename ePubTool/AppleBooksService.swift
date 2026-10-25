@@ -50,7 +50,7 @@ actor AppleBooksService {
               log: @Sendable (String, String) async -> Void = { _, _ in },
               update: @Sendable ([LibraryBook], Int) async -> Void) async throws {
         let databaseURL = try database ?? discoverDatabase()
-        await log("INFO", "Reading catalog: \(databaseURL.path)")
+        await log("INFO", String(localized: "Reading catalog: \(databaseURL.path)"))
         let sql = "SELECT ZPATH, ZTITLE, ZAUTHOR FROM ZBKLIBRARYASSET"
         await log("EXEC", sql)
         let entries = try readCatalog(databaseURL, sql: sql)
@@ -87,9 +87,9 @@ actor AppleBooksService {
             ))
         }
         books.sort { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
-        await log("INFO", "Read \(entries.count) catalog rows; matched \(books.count - unmatched)/\(books.count) source files.")
+        await log("INFO", String(localized: "Read \(entries.count) catalog rows; matched \(books.count - unmatched)/\(books.count) source files."))
         if unmatched > 0 {
-            await log("WARNING", "\(unmatched) files have no unambiguous catalog match; showing filenames without reading file metadata.")
+            await log("WARNING", String(localized: "\(unmatched) files have no unambiguous catalog match; showing filenames without reading file metadata."))
         }
         await update(books, books.count)
     }
@@ -125,7 +125,7 @@ actor AppleBooksService {
             }
             if let url = candidates.first { return url }
         }
-        throw RepackError.invalid("Cannot locate an accessible BKLibrary*.sqlite. Check that Apple Books is installed and ePubTool has Full Disk Access, then refresh. " + failures.joined(separator: " "))
+        throw RepackError.invalid(String(localized: "Cannot locate an accessible BKLibrary*.sqlite. Check that Apple Books is installed and ePubTool has Full Disk Access, then refresh. \(failures.joined(separator: " "))"))
     }
 
     private func readCatalog(_ url: URL, sql: String) throws -> [CatalogEntry] {
@@ -134,7 +134,7 @@ actor AppleBooksService {
         let result = sqlite3_open_v2(url.path, &database, SQLITE_OPEN_READONLY, nil)
         defer { if let database { sqlite3_close(database) } }
         guard result == SQLITE_OK, let database else {
-            throw RepackError.invalid("Cannot open Books database read-only: \(url.path). Check file access permissions.")
+            throw RepackError.invalid(String(localized: "Cannot open Books database read-only: \(url.path). Check file access permissions."))
         }
         sqlite3_busy_timeout(database, 2000)
         func message() -> String { String(cString: sqlite3_errmsg(database)) }
@@ -151,7 +151,7 @@ actor AppleBooksService {
         }
         guard step == SQLITE_DONE else { throw RepackError.invalid(message()) }
         guard Set(["ZPATH", "ZTITLE", "ZAUTHOR"]).isSubset(of: columns) else {
-            throw RepackError.invalid("Unsupported Books database schema. Expected ZBKLIBRARYASSET with ZPATH, ZTITLE and ZAUTHOR; found: \(columns.sorted().joined(separator: ", ")).")
+            throw RepackError.invalid(String(localized: "Unsupported Books database schema. Expected ZBKLIBRARYASSET with ZPATH, ZTITLE and ZAUTHOR; found: \(columns.sorted().joined(separator: ", "))."))
         }
         var statement: OpaquePointer?
         guard sqlite3_prepare_v2(database, sql, -1, &statement, nil) == SQLITE_OK else {
@@ -180,11 +180,11 @@ actor AppleBooksService {
         let targetFolder = folder.resolvingSymlinksInPath().standardizedFileURL
         guard targetFolder != source.deletingLastPathComponent(),
               targetFolder != source, !targetFolder.path.hasPrefix(source.path + "/") else {
-            throw RepackError.invalid("Choose an export folder outside the Apple Books source folder.")
+            throw RepackError.invalid(String(localized: "Choose an export folder outside the Apple Books source folder."))
         }
-        await progress("Checking iCloud availability: \(book.title)…")
+        await progress(String(localized: "Checking iCloud availability: \(book.title)…"))
         try await ensureDownloaded(book.url, title: book.title, progress: progress, log: log)
-        await progress("Exporting: \(book.title)…")
+        await progress(String(localized: "Exporting: \(book.title)…"))
         if book.isDirectory {
             return try await repacker.repack(source: book.url, destination: folder, outputFilename: book.exportFilename, log: log)
         }
@@ -198,13 +198,13 @@ actor AppleBooksService {
         if fm.fileExists(atPath: output.path) {
             let values = try output.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey])
             guard values.isRegularFile == true, values.isSymbolicLink != true else {
-                throw RepackError.invalid("Output is not a regular file: \(output.path)")
+                throw RepackError.invalid(String(localized: "Output is not a regular file: \(output.path)"))
             }
             _ = try fm.replaceItemAt(output, withItemAt: staged)
         } else {
             try fm.moveItem(at: staged, to: output)
         }
-        await log("SUCCESS", "Exported original \(book.format): \(output.path)")
+        await log("SUCCESS", String(localized: "Exported original \(book.format): \(output.path)"))
         return output
     }
 
@@ -223,22 +223,22 @@ actor AppleBooksService {
         ]
         var values = try url.resourceValues(forKeys: keys)
         if values.ubiquitousItemDownloadingStatus == .notDownloaded {
-            await progress("Downloading from iCloud: \(title)…")
-            await log("INFO", "Waiting for iCloud download: \(url.path)")
+            await progress(String(localized: "Downloading from iCloud: \(title)…"))
+            await log("INFO", String(localized: "Waiting for iCloud download: \(url.path)"))
             try FileManager.default.startDownloadingUbiquitousItem(at: url)
             let deadline = ContinuousClock.now.advanced(by: .seconds(300))
             while values.ubiquitousItemDownloadingStatus == .notDownloaded {
                 try Task.checkCancellation()
                 if let error = values.ubiquitousItemDownloadingError { throw error }
                 guard ContinuousClock.now < deadline else {
-                    throw RepackError.invalid("iCloud download timed out for \(title). Check your connection and try exporting again.")
+                    throw RepackError.invalid(String(localized: "iCloud download timed out for \(title). Check your connection and try exporting again."))
                 }
                 try await Task.sleep(for: .milliseconds(500))
                 url.removeAllCachedResourceValues()
                 values = try url.resourceValues(forKeys: keys)
             }
             if let error = values.ubiquitousItemDownloadingError { throw error }
-            await log("INFO", "iCloud download ready: \(url.path)")
+            await log("INFO", String(localized: "iCloud download ready: \(url.path)"))
         }
         // Unpacked EPUB folders can be local while individual chapters or images are not.
         if values.isDirectory == true && values.isSymbolicLink != true {

@@ -52,7 +52,7 @@ private struct ConsoleView: View {
                         .font(.headline)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(isExpanded ? "Collapse Console" : "Expand Console")
+                .accessibilityLabel(isExpanded ? Text("Collapse Console") : Text("Expand Console"))
                 Spacer()
                 Button("Clear Log") { model.logs.removeAll() }
                 Button("Copy Log") { model.copyLog() }
