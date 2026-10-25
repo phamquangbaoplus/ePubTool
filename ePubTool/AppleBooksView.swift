@@ -3,7 +3,7 @@ import AppKit
 
 struct AppleBooksView: View {
     @Bindable var model: AppleBooksViewModel
-    let console: RepackViewModel
+    let console: ConsoleViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -148,7 +148,7 @@ private struct ExportActivityView: View {
 
 private struct LibraryHeader: View {
     let model: AppleBooksViewModel
-    let console: RepackViewModel
+    let console: ConsoleViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -169,7 +169,7 @@ private struct LibraryHeader: View {
 
 private struct LibraryFooter: View {
     let model: AppleBooksViewModel
-    let console: RepackViewModel
+    let console: ConsoleViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

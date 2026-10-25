@@ -1,149 +1,45 @@
 import SwiftUI
-import AppKit
 
 enum Utility: String, Identifiable, CaseIterable {
     case appleBooks
-    case repack
+
     var id: String { rawValue }
 }
 
 struct ContentView: View {
-    @State private var model = RepackViewModel()
+    @State private var console = ConsoleViewModel()
     @State private var library = AppleBooksViewModel()
     @State private var selection: Utility? = .appleBooks
 
     var body: some View {
         NavigationSplitView {
             List(Utility.allCases, selection: $selection) { tool in
-                Label(tool == .repack ? "Repack ePub" : "Manage Apple Books", systemImage: tool == .repack ? "books.vertical" : "book.closed")
-                    .tag(tool)
+                switch tool {
+                case .appleBooks:
+                    Label("Manage Apple Books", systemImage: "book.closed")
+                        .tag(tool)
+                }
             }
             .navigationTitle("ePubTool")
             .navigationSplitViewColumnWidth(min: 180, ideal: 210)
         } detail: {
             VStack(spacing: 0) {
-                if selection == .repack {
-                    RepackToolView(model: model)
-                } else if selection == .appleBooks {
-                    AppleBooksView(model: library, console: model)
-                } else {
+                switch selection {
+                case .appleBooks:
+                    AppleBooksView(model: library, console: console)
+                case nil:
                     ContentUnavailableView("Select a tool", systemImage: "sidebar.left")
                 }
                 Divider()
-                ConsoleView(model: model)
+                ConsoleView(model: console)
             }
         }
-        .frame(minWidth: selection == .appleBooks ? 1000 : 800, minHeight: 650)
-    }
-}
-
-private struct RepackToolView: View {
-    let model: RepackViewModel
-    @State private var isTargeted = false
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Repack Apple Books ePub").font(.title2.bold())
-                Text("Turn unpacked book folders into standard .epub files.")
-                    .foregroundStyle(.secondary)
-            }
-            VStack(spacing: 10) {
-                Image(systemName: "folder.badge.plus").font(.largeTitle).foregroundStyle(.tint)
-                Text("Drop unpacked ePub folders here").font(.headline)
-                Button("Choose Folders…") { Task { await model.chooseSources() } }
-                Text("Multiple folders supported · Originals stay untouched")
-                    .font(.caption).foregroundStyle(.secondary)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(20)
-            .background(isTargeted ? Color.accentColor.opacity(0.12) : Color.secondary.opacity(0.05),
-                        in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(isTargeted ? Color.accentColor : Color.secondary.opacity(0.25), style: StrokeStyle(lineWidth: 1, dash: [6])))
-            .dropDestination(for: URL.self) { urls, _ in
-                guard !model.isRunning else { return false }
-                model.add(urls)
-                return true
-            } isTargeted: { isTargeted = $0 }
-            .disabled(model.isRunning)
-
-            HStack {
-                Text("Queue (\(model.jobs.count))").font(.headline)
-                Spacer()
-                Button("Remove All") { model.jobs.removeAll() }
-                    .disabled(model.isRunning || model.jobs.isEmpty)
-            }
-            List(model.jobs) { job in
-                HStack {
-                    Image(systemName: job.output == nil ? "book.closed" : "checkmark.circle.fill")
-                        .foregroundStyle(job.output == nil ? Color.secondary : Color.green)
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(job.source.lastPathComponent).fontWeight(.medium)
-                        Text(job.status).font(.caption).foregroundStyle(.secondary)
-                            .textSelection(.enabled)
-                    }
-                    Spacer()
-                    if let output = job.output {
-                        Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([output]) }
-                    }
-                    Button {
-                        model.jobs.removeAll { $0.id == job.id }
-                    } label: { Image(systemName: "xmark.circle") }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Remove \(job.source.lastPathComponent)")
-                        .disabled(model.isRunning)
-                }
-                .help(job.source.path)
-            }
-            .frame(minHeight: 100)
-            .overlay {
-                if model.jobs.isEmpty {
-                    Text("No folders selected").foregroundStyle(.secondary)
-                }
-            }
-            OutputControls(model: model)
-        }
-        .padding(24)
-        .navigationTitle("Repack ePub")
-    }
-}
-
-private struct OutputControls: View {
-    let model: RepackViewModel
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Output folder").font(.headline)
-                    Text(model.destination?.path ?? "Choose where to save your repacked books")
-                        .font(.caption).foregroundStyle(.secondary)
-                        .lineLimit(2).textSelection(.enabled)
-                }
-                Spacer()
-                Button("Choose…") { Task { await model.chooseDestination() } }
-                    .disabled(model.isRunning)
-            }
-            Text("Saved as <book>_repacked.epub. Existing files with the same name will be overwritten.")
-                .font(.caption).foregroundStyle(.secondary)
-            HStack {
-                if model.isRunning {
-                    ProgressView().controlSize(.small)
-                    ProgressView(value: Double(model.completed), total: Double(max(model.jobs.count, 1)))
-                        .frame(width: 100)
-                }
-                Text(model.summary).font(.caption).foregroundStyle(.secondary)
-                Spacer()
-                Button("Repack ePub") { Task { await model.run() } }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(model.isRunning || model.jobs.isEmpty || model.destination == nil)
-            }
-        }
+        .frame(minWidth: 1000, minHeight: 650)
     }
 }
 
 private struct ConsoleView: View {
-    let model: RepackViewModel
+    let model: ConsoleViewModel
     @State private var isExpanded = true
 
     var body: some View {
@@ -173,7 +69,7 @@ private struct ConsoleView: View {
 }
 
 private struct ConsoleLogView: View {
-    let model: RepackViewModel
+    let model: ConsoleViewModel
 
     var body: some View {
             ScrollViewReader { proxy in

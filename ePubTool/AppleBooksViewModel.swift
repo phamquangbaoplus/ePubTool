@@ -23,13 +23,13 @@ final class AppleBooksViewModel {
     private var editors: [UUID: Process] = [:]
     private var didLoad = false
 
-    func loadIfNeeded(console: RepackViewModel) {
+    func loadIfNeeded(console: ConsoleViewModel) {
         guard !didLoad else { return }
         didLoad = true
         reload(console: console)
     }
 
-    func reload(console: RepackViewModel) {
+    func reload(console: ConsoleViewModel) {
         guard !isLoading, !isWorking else { return }
         isLoading = true
         books = []
@@ -70,7 +70,7 @@ final class AppleBooksViewModel {
         selection.formIntersection(Set(filtered.map(\.id)))
     }
 
-    func export(_ items: [LibraryBook], console: RepackViewModel) async {
+    func export(_ items: [LibraryBook], console: ConsoleViewModel) async {
         guard !items.isEmpty, !isWorking else { return }
         isWorking = true
         defer { isWorking = false }
@@ -119,11 +119,11 @@ final class AppleBooksViewModel {
         filtered.filter { selection.contains($0.id) && $0.format == "EPUB" }
     }
 
-    func edit(_ book: LibraryBook, console: RepackViewModel) async {
+    func edit(_ book: LibraryBook, console: ConsoleViewModel) async {
         await edit([book], console: console)
     }
 
-    func edit(_ items: [LibraryBook], console: RepackViewModel) async {
+    func edit(_ items: [LibraryBook], console: ConsoleViewModel) async {
         let epubs = items.filter { $0.format == "EPUB" }
         guard !epubs.isEmpty, !isWorking, !isLoading else { return }
         isWorking = true
@@ -144,7 +144,7 @@ final class AppleBooksViewModel {
         console.log("INFO", status)
     }
 
-    private func openEditor(_ book: LibraryBook, console: RepackViewModel) async throws {
+    private func openEditor(_ book: LibraryBook, console: ConsoleViewModel) async throws {
         let executable = URL(fileURLWithPath: "/Applications/calibre.app/Contents/MacOS/ebook-edit")
         guard FileManager.default.isExecutableFile(atPath: executable.path) else {
             throw RepackError.invalid("Calibre ebook-edit was not found in /Applications/calibre.app.")
