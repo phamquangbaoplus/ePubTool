@@ -61,13 +61,14 @@ jobs:
           codesign --verify --deep --strict --verbose=2 "$app"
           /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist"
           mkdir -p dist
-          archive="ePubTool-${TAG}-macOS-arm64.zip"
-          ditto -c -k --sequesterRsrc --keepParent "$app" "dist/$archive"
+          archive="ePubTool-${TAG}-macOS-arm64.dmg"
+          bash scripts/package-dmg.sh "$app" "dist/$archive"
           (cd dist && shasum -a 256 "$archive" > SHA256SUMS.txt)
           cat > dist/release-notes.md <<NOTES
           Automated build from commit ${GITHUB_SHA}.
 
-          Download **$archive**, extract it, and move ePubTool.app to Applications.
+          Download **$archive**, open it, and drag ePubTool.app onto Applications.
+          Open **READ ME FIRST.txt** inside the DMG for setup instructions.
 
           - Requires **macOS 27 or later** and **Apple Silicon**.
           - Ad-hoc signed; not Developer ID signed or notarized by Apple. Gatekeeper may block the downloaded app.
@@ -84,6 +85,12 @@ jobs:
           ```
 
           Run this only for a download from this repository that you trust. It removes download quarantine from ePubTool only; it does not notarize the app or disable Gatekeeper system-wide. You may need to repeat it after installing an update.
+
+          ### Required: Full Disk Access
+
+          Open **System Settings → Privacy & Security → Full Disk Access**, click **+**, select **/Applications/ePubTool.app**, and enable its switch. Quit ePubTool completely and reopen it, then click **Refresh** in Manage Apple Books. This permission is required to read the Apple Books library; the Terminal command does not grant it.
+
+          If access stops working after an update, remove the old Full Disk Access entry and add the installed app again.
 
           If the app is still blocked, try opening it once, then use System Settings → Privacy & Security → Open Anyway for ePubTool, if available. See the [installation guide](https://github.com/phamquangbaoplus/ePubTool#install-a-release) for troubleshooting and Apple Books permissions.
           INSTALL
@@ -103,5 +110,5 @@ jobs:
               --title "ePubTool $TAG" --draft --generate-notes \
               --notes-file dist/release-notes.md
           fi
-          gh release upload "$TAG" "dist/ePubTool-${TAG}-macOS-arm64.zip" dist/SHA256SUMS.txt --clobber
+          gh release upload "$TAG" "dist/ePubTool-${TAG}-macOS-arm64.dmg" dist/SHA256SUMS.txt --clobber
           gh release edit "$TAG" --draft=false --latest

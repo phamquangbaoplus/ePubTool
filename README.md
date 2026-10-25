@@ -37,8 +37,8 @@ The library database is opened read-only, and export works from the Apple Books 
 
 Requires **Apple Silicon and macOS 27 or later**.
 
-1. Download the app ZIP from [GitHub Releases](https://github.com/phamquangbaoplus/ePubTool/releases/latest).
-2. Extract it and drag **ePubTool.app** into **Applications** (`/Applications/ePubTool.app`).
+1. Download the app DMG from [GitHub Releases](https://github.com/phamquangbaoplus/ePubTool/releases/latest).
+2. Open the DMG and drag **ePubTool.app** onto the **Applications** shortcut (`/Applications/ePubTool.app`). Wait for the copy to finish. The DMG includes **READ ME FIRST.txt** with the Terminal command and Full Disk Access instructions.
 3. Open **Terminal**, paste this command, and press Return:
 
 ```bash
@@ -51,7 +51,19 @@ After this setup, open ePubTool normally from Applications. You may need to repe
 
 If Terminal reports **No such file**, check that the app is named `ePubTool.app` and is inside `/Applications`. If access is denied or macOS still blocks opening, try opening the app once, then use **System Settings → Privacy & Security → Open Anyway** for ePubTool, if available. See [Apple’s instructions for opening downloaded apps](https://support.apple.com/102445). This command does not resolve incompatible macOS versions, damaged downloads, or organization-managed restrictions.
 
-Apple Books library access is separate: if the library cannot be loaded, follow the Full Disk Access instructions below.
+### Required: Full Disk Access
+
+To read the Apple Books library, grant **ePubTool** Full Disk Access:
+
+1. Open **System Settings → Privacy & Security → Full Disk Access**.
+2. Click **+**, select **/Applications/ePubTool.app**, and authenticate if prompted.
+3. Enable the switch beside **ePubTool**.
+4. Quit the app completely with **⌘Q**, then reopen it from **Applications**.
+5. Select **Manage Apple Books** and click **Refresh**.
+
+The Terminal command above does **not** grant this permission; you must approve it in System Settings. If library access stops working after an update, remove the old entry and add the installed app again.
+
+Eject the DMG after installation. Always launch the installed copy from Applications.
 
 ## Getting started
 
@@ -83,7 +95,7 @@ Use an Xcode installation and macOS version compatible with the project’s conf
 
 ## Automatic releases
 
-Every push to `main` runs [the release workflow](.github/workflows/release.yml). It builds the app, checks its signature and icon, packages a ZIP with a SHA-256 checksum, and publishes a GitHub Release with generated release notes. No manual tag or version edit is required.
+Every push to `main` runs [the release workflow](.github/workflows/release.yml). It builds the app, checks its signature and icon, packages a DMG with an Applications shortcut, installation instructions, and a SHA-256 checksum, and publishes a GitHub Release with generated release notes. No manual tag or version edit is required.
 
 Versions use `1.0.<GitHub run number>`; failed runs may leave gaps. Re-running a workflow keeps the same version and does not replace an already published release. You can also start the workflow manually from the Actions tab on `main`. Rapid pushes may replace a pending run; the newest pending commit will be built.
 
