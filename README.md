@@ -33,6 +33,26 @@ The library database is opened read-only, and export works from the Apple Books 
 
 **Existing files with the same export filename are overwritten.** Duplicate output names within one export batch are reported as errors.
 
+## Install a release
+
+Requires **Apple Silicon and macOS 27 or later**.
+
+1. Download the app ZIP from [GitHub Releases](https://github.com/phamquangbaoplus/ePubTool/releases/latest).
+2. Extract it and drag **ePubTool.app** into **Applications** (`/Applications/ePubTool.app`).
+3. Open **Terminal**, paste this command, and press Return:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/ePubTool.app" && open "/Applications/ePubTool.app"
+```
+
+Only run this for a copy downloaded from this repository that you trust. The command removes the download quarantine attribute from **ePubTool only**, then opens it. It does not notarize the app or disable Gatekeeper system-wide. Release builds are currently ad-hoc signed and have not been notarized by Apple.
+
+After this setup, open ePubTool normally from Applications. You may need to repeat the command after replacing it with a newly downloaded version.
+
+If Terminal reports **No such file**, check that the app is named `ePubTool.app` and is inside `/Applications`. If access is denied or macOS still blocks opening, try opening the app once, then use **System Settings → Privacy & Security → Open Anyway** for ePubTool, if available. See [Apple’s instructions for opening downloaded apps](https://support.apple.com/102445). This command does not resolve incompatible macOS versions, damaged downloads, or organization-managed restrictions.
+
+Apple Books library access is separate: if the library cannot be loaded, follow the Full Disk Access instructions below.
+
 ## Getting started
 
 1. Open Apple Books and make sure your library is available on this Mac.
@@ -60,6 +80,16 @@ Edits are saved to the separate copy; they are not written back to Apple Books. 
 5. Build and run with **⌘R**.
 
 Use an Xcode installation and macOS version compatible with the project’s configured SDK and deployment target. The app is written in Swift and SwiftUI and uses the system ZIP utility for repacking.
+
+## Automatic releases
+
+Every push to `main` runs [the release workflow](.github/workflows/release.yml). It builds the app, checks its signature and icon, packages a ZIP with a SHA-256 checksum, and publishes a GitHub Release with generated release notes. No manual tag or version edit is required.
+
+Versions use `1.0.<GitHub run number>`; failed runs may leave gaps. Re-running a workflow keeps the same version and does not replace an already published release. You can also start the workflow manually from the Actions tab on `main`. Rapid pushes may replace a pending run; the newest pending commit will be built.
+
+Download builds from [Releases](https://github.com/phamquangbaoplus/ePubTool/releases/latest). Automated binaries currently require **Apple Silicon and macOS 27 or later**. They are ad-hoc signed, not Developer ID signed or notarized; macOS Gatekeeper may block them.
+
+The workflow uses GitHub's built-in `GITHUB_TOKEN` with `contents: write`; no personal access token or Apple certificate is required for this release mode. GitHub Actions must be enabled for the repository, and repository rules must permit the workflow to create release tags. Developer ID signing and notarization require a separate Apple credential setup.
 
 ## Scope and limitations
 

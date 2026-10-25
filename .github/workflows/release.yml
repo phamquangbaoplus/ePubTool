@@ -1,0 +1,107 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: xcode-27
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set release version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="1.0.${GITHUB_RUN_NUMBER}"
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          echo "TAG=v$version" >> "$GITHUB_ENV"
+
+      - name: Build Release app
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          xcodebuild \
+            -project ePubTool.xcodeproj \
+            -target ePubTool \
+            -configuration Release \
+            -sdk macosx \
+            ARCHS=arm64 ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= \
+            MARKETING_VERSION="$VERSION" \
+            CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" \
+            PRODUCT_BUNDLE_IDENTIFIER=com.phamquangbaoplus.ePubTool \
+            CONFIGURATION_BUILD_DIR="$RUNNER_TEMP/release-build" \
+            build
+
+      - name: Verify and package app
+        shell: bash
+        run: |
+          set -euo pipefail
+          app="$RUNNER_TEMP/release-build/ePubTool.app"
+          test -f "$app/Contents/Resources/AppIcon.icns"
+          codesign --verify --deep --strict --verbose=2 "$app"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app/Contents/Info.plist"
+          mkdir -p dist
+          archive="ePubTool-${TAG}-macOS-arm64.zip"
+          ditto -c -k --sequesterRsrc --keepParent "$app" "dist/$archive"
+          (cd dist && shasum -a 256 "$archive" > SHA256SUMS.txt)
+          cat > dist/release-notes.md <<NOTES
+          Automated build from commit ${GITHUB_SHA}.
+
+          Download **$archive**, extract it, and move ePubTool.app to Applications.
+
+          - Requires **macOS 27 or later** and **Apple Silicon**.
+          - Ad-hoc signed; not Developer ID signed or notarized by Apple. Gatekeeper may block the downloaded app.
+          - SHA-256 checksum is included in SHA256SUMS.txt.
+          NOTES
+          cat >> dist/release-notes.md <<'INSTALL'
+
+          ### First launch
+
+          After moving ePubTool.app to /Applications, open Terminal and run:
+
+          ```bash
+          xattr -dr com.apple.quarantine "/Applications/ePubTool.app" && open "/Applications/ePubTool.app"
+          ```
+
+          Run this only for a download from this repository that you trust. It removes download quarantine from ePubTool only; it does not notarize the app or disable Gatekeeper system-wide. You may need to repeat it after installing an update.
+
+          If the app is still blocked, try opening it once, then use System Settings → Privacy & Security → Open Anyway for ePubTool, if available. See the [installation guide](https://github.com/phamquangbaoplus/ePubTool#install-a-release) for troubleshooting and Apple Books permissions.
+          INSTALL
+
+      - name: Publish GitHub Release
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Keep incomplete uploads as drafts; reruns reuse the same version.
+          if gh release view "$TAG" --json isDraft > "$RUNNER_TEMP/release.json"; then
+            if [ "$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["isDraft"])' "$RUNNER_TEMP/release.json")" = False ]; then
+              echo "Release $TAG is already published; leaving its assets unchanged."
+              exit 0
+            fi
+          else
+            gh release create "$TAG" --target "$GITHUB_SHA" \
+              --title "ePubTool $TAG" --draft --generate-notes \
+              --notes-file dist/release-notes.md
+          fi
+          gh release upload "$TAG" "dist/ePubTool-${TAG}-macOS-arm64.zip" dist/SHA256SUMS.txt --clobber
+          gh release edit "$TAG" --draft=false --latest
