@@ -1,0 +1,131 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%lld books · %lld selected" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld books · %2$lld selected"
+          }
+        }
+      }
+    },
+    "%lld of %lld processed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld of %2$lld processed"
+          }
+        }
+      }
+    },
+    "Actions" : {
+
+    },
+    "Author" : {
+
+    },
+    "Clear Log" : {
+
+    },
+    "Collapse Console" : {
+
+    },
+    "Console" : {
+
+    },
+    "Copied" : {
+
+    },
+    "Copy %@" : {
+
+    },
+    "Copy Log" : {
+
+    },
+    "Deselect All" : {
+
+    },
+    "Double-click to copy %@" : {
+
+    },
+    "Edit" : {
+
+    },
+    "Edit %@" : {
+
+    },
+    "Edit opens a separate copy in Calibre. Export reads the Apple Books original. Existing export files are overwritten." : {
+
+    },
+    "Edit Selected (%lld)" : {
+
+    },
+    "ePubTool" : {
+
+    },
+    "Expand Console" : {
+
+    },
+    "Export" : {
+
+    },
+    "Export %@" : {
+
+    },
+    "Export book" : {
+
+    },
+    "Export Selected (%lld)" : {
+
+    },
+    "Format" : {
+
+    },
+    "Manage Apple Books" : {
+
+    },
+    "No books loaded" : {
+
+    },
+    "No matching books" : {
+
+    },
+    "Open an editable EPUB copy in Calibre" : {
+
+    },
+    "Open selected EPUBs in Calibre; PDFs are skipped" : {
+
+    },
+    "Refresh" : {
+
+    },
+    "Search title, author or filename…" : {
+
+    },
+    "Select a tool" : {
+
+    },
+    "Select All Results" : {
+
+    },
+    "Show Edited Copy in Finder" : {
+
+    },
+    "Show Exports" : {
+
+    },
+    "Show Original in Finder" : {
+
+    },
+    "Stop" : {
+
+    },
+    "Title" : {
+
+    }
+  },
+  "version" : "1.3"
+}
