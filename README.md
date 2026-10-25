@@ -10,6 +10,10 @@
   <a href="LICENSE">MIT License</a> · Swift · SwiftUI · macOS
 </p>
 
+<p align="center">
+  <img src="assets/screenshot.png" alt="ePubTool Screenshot" width="800">
+</p>
+
 ePubTool brings small, focused book utilities into one native Mac app. It helps you work with your Apple Books library, export books as portable files, and prepare separate EPUB copies for editing. The sidebar keeps these utilities together and provides room for more tools as the project grows.
 
 ## Apple Books workflows
