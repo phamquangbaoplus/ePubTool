@@ -2,18 +2,20 @@ import SwiftUI
 import AppKit
 
 enum Utility: String, Identifiable, CaseIterable {
+    case appleBooks
     case repack
     var id: String { rawValue }
 }
 
 struct ContentView: View {
     @State private var model = RepackViewModel()
-    @State private var selection: Utility? = .repack
+    @State private var library = AppleBooksViewModel()
+    @State private var selection: Utility? = .appleBooks
 
     var body: some View {
         NavigationSplitView {
             List(Utility.allCases, selection: $selection) { tool in
-                Label("Repack ePub", systemImage: "books.vertical")
+                Label(tool == .repack ? "Repack ePub" : "Manage Apple Books", systemImage: tool == .repack ? "books.vertical" : "book.closed")
                     .tag(tool)
             }
             .navigationTitle("ePubTool")
@@ -22,6 +24,8 @@ struct ContentView: View {
             VStack(spacing: 0) {
                 if selection == .repack {
                     RepackToolView(model: model)
+                } else if selection == .appleBooks {
+                    AppleBooksView(model: library, console: model)
                 } else {
                     ContentUnavailableView("Select a tool", systemImage: "sidebar.left")
                 }
@@ -29,7 +33,7 @@ struct ContentView: View {
                 ConsoleView(model: model)
             }
         }
-        .frame(minWidth: 800, minHeight: 650)
+        .frame(minWidth: selection == .appleBooks ? 1000 : 800, minHeight: 650)
     }
 }
 

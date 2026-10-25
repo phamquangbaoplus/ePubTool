@@ -11,7 +11,7 @@ enum RepackError: LocalizedError {
 
 /// Owns disk and process work away from the main actor.
 actor RepackService {
-    func repack(source: URL, destination: URL,
+    func repack(source: URL, destination: URL, outputFilename: String? = nil,
                 log: @Sendable (String, String) async -> Void) async throws -> URL {
         let fm = FileManager.default
         let access = source.startAccessingSecurityScopedResource()
@@ -63,7 +63,7 @@ actor RepackService {
         try await run(["-X", "-r", "-9", archive.path, ".", "-x", "mimetype"], in: staging, log: log)
         try await run(["-T", archive.path], in: staging, log: log)
         let base = source.deletingPathExtension().lastPathComponent + "_repacked"
-        let output = destination.appendingPathComponent(base + ".epub")
+        let output = destination.appendingPathComponent(outputFilename ?? base + ".epub")
         // Stage on the destination volume before replacing the existing file.
         let replacementDirectory = destination.appendingPathComponent(".ePubTool-" + UUID().uuidString)
         try fm.createDirectory(at: replacementDirectory, withIntermediateDirectories: false)
