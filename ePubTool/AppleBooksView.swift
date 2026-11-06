@@ -174,7 +174,7 @@ private struct LibraryFooter: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Edit opens a separate copy in Calibre. Export reads the Apple Books original. Existing export files are overwritten.")
+            Text("Edit opens a separate copy in Calibre. Export reads the Apple Books original. Configure overwrite in Settings. Backup mode is available when exporting the entire selected library.")
                 .font(.caption).foregroundStyle(.secondary)
             HStack {
                 if model.isLoading || model.isWorking { ProgressView().controlSize(.small) }
@@ -193,7 +193,7 @@ private struct LibraryFooter: View {
                 .help("Open selected EPUBs in Calibre; PDFs are skipped")
                 Button("Export Selected (\(model.selection.count))") {
                     let selected = model.filtered.filter { model.selection.contains($0.id) }
-                    Task { await model.export(selected, console: console) }
+                    Task { await model.export(selected, fromSelection: true, console: console) }
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(model.selection.isEmpty || model.isWorking || model.isLoading)

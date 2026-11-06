@@ -37,7 +37,119 @@ nonisolated struct LibraryBook: Identifiable, Sendable {
     }
 }
 
+nonisolated struct BookExportItem: Sendable {
+    let book: LibraryBook
+    let filename: String
+
+    static func plan(for books: [LibraryBook]) -> [BookExportItem] {
+        func key(_ name: String) -> String {
+            name.precomposedStringWithCanonicalMapping.lowercased()
+        }
+        // Reserve natural names so a generated "(2)" never takes another book's name.
+        let reserved = Set(books.map { key($0.exportFilename) })
+        var used: Set<String> = []
+        var filenames: [String: String] = [:]
+        // Source identity makes numbering independent of table order or selection.
+        for book in books.sorted(by: { $0.id < $1.id }) {
+            guard filenames[book.id] == nil else { continue }
+            let original = book.exportFilename
+            var candidate = original
+            var number = 2
+            while used.contains(key(candidate)) || (candidate != original && reserved.contains(key(candidate))) {
+                let suffix = " (\(number))." + book.format.lowercased()
+                var stem = String(original.dropLast(book.format.utf8.count + 1))
+                while stem.utf8.count + suffix.utf8.count > 255 { stem.removeLast() }
+                candidate = stem + suffix
+                number += 1
+                if reserved.contains(key(candidate)) { continue }
+                if !used.contains(key(candidate)) { break }
+            }
+            used.insert(key(candidate))
+            filenames[book.id] = candidate
+        }
+        return books.compactMap { book in
+            filenames[book.id].map { BookExportItem(book: book, filename: $0) }
+        }
+    }
+}
+
+nonisolated struct ExportSummary: Sendable {
+    var succeeded = 0
+    var skipped = 0
+    var failed = 0
+    var completed: Int { succeeded + skipped + failed }
+}
+
+nonisolated enum BookExportOutcome: Sendable {
+    case succeeded, skipped, failed
+}
+
 actor AppleBooksService {
+    /// Only keep a bounded number of jobs alive, each with its own service and repacker.
+    func exportBatch(
+        _ items: [BookExportItem], to destination: URL, overwrite: Bool,
+        concurrencyLimit: Int = ExportSettings.defaultConcurrency,
+        progress: @escaping @Sendable (Int, String) async -> Void,
+        log: @escaping @Sendable (String, String) async -> Void
+    ) async -> ExportSummary {
+        let limit = min(items.count, ExportSettings.clamped(concurrencyLimit))
+        await log("INFO", String(localized: "Exporting with up to \(limit) concurrent books."))
+        return await withTaskGroup(of: BookExportOutcome.self) { group in
+            var nextIndex = 0
+            var summary = ExportSummary()
+            func submit(_ item: BookExportItem) {
+                group.addTask {
+                    let worker = AppleBooksService()
+                    return await worker.exportItem(item, to: destination, overwrite: overwrite, log: log)
+                }
+            }
+            for _ in 0..<limit {
+                submit(items[nextIndex])
+                nextIndex += 1
+            }
+            while let outcome = await group.next() {
+                switch outcome {
+                case .succeeded: summary.succeeded += 1
+                case .skipped: summary.skipped += 1
+                case .failed: summary.failed += 1
+                }
+                await progress(summary.completed, String(localized: "Exporting: \(summary.completed)/\(items.count) processed"))
+                if nextIndex < items.count {
+                    submit(items[nextIndex])
+                    nextIndex += 1
+                }
+            }
+            return summary
+        }
+    }
+
+    private func exportItem(
+        _ item: BookExportItem, to destination: URL, overwrite: Bool,
+        log: @escaping @Sendable (String, String) async -> Void
+    ) async -> BookExportOutcome {
+        // Prefix worker messages because several books may log at the same time.
+        let bookLog: @Sendable (String, String) async -> Void = { level, message in
+            await log(level, "[\(item.filename)] \(message)")
+        }
+        do {
+            try Task.checkCancellation()
+            if item.filename != item.book.exportFilename {
+                await bookLog("INFO", String(localized: "Duplicate name exported as: \(item.filename)"))
+            }
+            _ = try await export(item.book, to: destination, outputFilename: item.filename,
+                                 overwrite: overwrite, progress: { message in
+                await bookLog("INFO", message)
+            }, log: bookLog)
+            return .succeeded
+        } catch RepackError.outputExists {
+            await bookLog("INFO", String(localized: "Skipped existing file: \(item.filename)"))
+            return .skipped
+        } catch {
+            await bookLog("ERROR", error.localizedDescription)
+            return .failed
+        }
+    }
+
     private let repacker = RepackService()
 
     private struct CatalogEntry {
@@ -90,6 +202,19 @@ actor AppleBooksService {
         await log("INFO", String(localized: "Read \(entries.count) catalog rows; matched \(books.count - unmatched)/\(books.count) source files."))
         if unmatched > 0 {
             await log("WARNING", String(localized: "\(unmatched) files have no unambiguous catalog match; showing filenames without reading file metadata."))
+        }
+        // Match the export naming rules, including Unicode and case normalization.
+        let duplicateGroups = Dictionary(grouping: books) {
+            $0.exportFilename.precomposedStringWithCanonicalMapping.lowercased()
+        }.filter { $0.value.count > 1 }
+        for key in duplicateGroups.keys.sorted() {
+            try Task.checkCancellation()
+            guard let group = duplicateGroups[key]?.sorted(by: { $0.id < $1.id }),
+                  let first = group.first else { continue }
+            await log("WARNING", String(localized: "Duplicate export name: \(first.exportFilename) — \(group.count) books. Export will add numbered suffixes."))
+            for book in group {
+                await log("INFO", String(localized: "Duplicate source: \(book.url.path)"))
+            }
         }
         await update(books, books.count)
     }
@@ -173,7 +298,43 @@ actor AppleBooksService {
         return entries
     }
 
-    func export(_ book: LibraryBook, to folder: URL,
+    /// Validate the entire batch before deleting any destination files.
+    func cleanBackupDestination(_ folder: URL, items: [BookExportItem],
+                                log: @Sendable (String, String) async -> Void) async throws {
+        guard !items.isEmpty else { return }
+        let target = folder.resolvingSymlinksInPath().standardizedFileURL
+        var names: Set<String> = []
+        for item in items {
+            let book = item.book
+            let source = book.url.resolvingSymlinksInPath().standardizedFileURL
+            let sourceFolder = source.deletingLastPathComponent()
+            guard target != sourceFolder, !target.path.hasPrefix(sourceFolder.path + "/"),
+                  !source.path.hasPrefix(target.path + "/") else {
+                throw RepackError.invalid(String(localized: "Choose an export folder outside the Apple Books source folder."))
+            }
+            guard names.insert(item.filename.precomposedStringWithCanonicalMapping.lowercased()).inserted else {
+                throw RepackError.invalid(String(localized: "Duplicate export filename in this batch: \(book.exportFilename)"))
+            }
+            guard FileManager.default.fileExists(atPath: source.path) else {
+                throw RepackError.invalid(String(localized: "Source file is missing: \(source.path)"))
+            }
+        }
+        let fm = FileManager.default
+        let files = try fm.contentsOfDirectory(at: target, includingPropertiesForKeys: [.isRegularFileKey, .isSymbolicLinkKey])
+        // Inspect all entries before beginning deletion; never recurse into directories.
+        let obsolete = try files.filter { file in
+            guard !names.contains(file.lastPathComponent.precomposedStringWithCanonicalMapping.lowercased()) else { return false }
+            let values = try file.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey])
+            return values.isRegularFile == true || values.isSymbolicLink == true
+        }
+        for file in obsolete {
+            try Task.checkCancellation()
+            try fm.removeItem(at: file)
+            await log("INFO", String(localized: "Removed obsolete backup file: \(file.path)"))
+        }
+    }
+
+    func export(_ book: LibraryBook, to folder: URL, outputFilename: String? = nil, overwrite: Bool = true,
                 progress: @Sendable (String) async -> Void = { _ in },
                 log: @Sendable (String, String) async -> Void) async throws -> URL {
         let source = book.url.resolvingSymlinksInPath().standardizedFileURL
@@ -182,20 +343,25 @@ actor AppleBooksService {
               targetFolder != source, !targetFolder.path.hasPrefix(source.path + "/") else {
             throw RepackError.invalid(String(localized: "Choose an export folder outside the Apple Books source folder."))
         }
+        let filename = outputFilename ?? book.exportFilename
+        if !overwrite && FileManager.default.fileExists(atPath: folder.appendingPathComponent(filename).path) {
+            throw RepackError.outputExists
+        }
         await progress(String(localized: "Checking iCloud availability: \(book.title)…"))
         try await ensureDownloaded(book.url, title: book.title, progress: progress, log: log)
         await progress(String(localized: "Exporting: \(book.title)…"))
         if book.isDirectory {
-            return try await repacker.repack(source: book.url, destination: folder, outputFilename: book.exportFilename, log: log)
+            return try await repacker.repack(source: book.url, destination: folder, outputFilename: filename, overwrite: overwrite, log: log)
         }
         let fm = FileManager.default
-        let output = folder.appendingPathComponent(book.exportFilename)
+        let output = folder.appendingPathComponent(filename)
         let temporary = folder.appendingPathComponent(".ePubTool-" + UUID().uuidString)
         try fm.createDirectory(at: temporary, withIntermediateDirectories: false)
         defer { try? fm.removeItem(at: temporary) }
         let staged = temporary.appendingPathComponent(book.url.lastPathComponent)
         try fm.copyItem(at: book.url, to: staged)
         if fm.fileExists(atPath: output.path) {
+            guard overwrite else { throw RepackError.outputExists }
             let values = try output.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey])
             guard values.isRegularFile == true, values.isSymbolicLink != true else {
                 throw RepackError.invalid(String(localized: "Output is not a regular file: \(output.path)"))

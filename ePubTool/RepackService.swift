@@ -2,16 +2,18 @@ import Foundation
 
 enum RepackError: LocalizedError {
     case invalid(String)
+    case outputExists
     var errorDescription: String? {
         switch self {
         case .invalid(let message): message
+        case .outputExists: String(localized: "Skipped existing destination file.")
         }
     }
 }
 
 /// Owns disk and process work away from the main actor.
 actor RepackService {
-    func repack(source: URL, destination: URL, outputFilename: String? = nil,
+    func repack(source: URL, destination: URL, outputFilename: String? = nil, overwrite: Bool = true,
                 log: @Sendable (String, String) async -> Void) async throws -> URL {
         let fm = FileManager.default
         let access = source.startAccessingSecurityScopedResource()
@@ -71,6 +73,7 @@ actor RepackService {
         let replacement = replacementDirectory.appendingPathComponent("result.epub")
         try fm.copyItem(at: archive, to: replacement)
         if fm.fileExists(atPath: output.path) {
+            guard overwrite else { throw RepackError.outputExists }
             let values = try output.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey])
             guard values.isRegularFile == true, values.isSymbolicLink != true else {
                 throw RepackError.invalid(String(localized: "Output path is not a regular file: \(output.path)"))

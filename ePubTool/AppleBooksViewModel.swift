@@ -70,10 +70,30 @@ final class AppleBooksViewModel {
         selection.formIntersection(Set(filtered.map(\.id)))
     }
 
-    func export(_ items: [LibraryBook], console: ConsoleViewModel) async {
-        guard !items.isEmpty, !isWorking else { return }
+    // Main-actor isolation makes acquisition atomic across all app windows.
+    private static var exportInProgress = false
+
+    func export(_ items: [LibraryBook], fromSelection: Bool = false, console: ConsoleViewModel) async {
+        guard !items.isEmpty, !isWorking, !isLoading else { return }
+        guard !Self.exportInProgress else {
+            status = String(localized: "An export is already running in another window. Wait for it to finish.")
+            console.log("WARNING", status)
+            return
+        }
+        Self.exportInProgress = true
         isWorking = true
-        defer { isWorking = false }
+        defer {
+            isWorking = false
+            Self.exportInProgress = false
+        }
+        let allSelected = fromSelection && !books.isEmpty
+            && Set(items.map(\.id)) == Set(books.map(\.id))
+            && selection == Set(books.map(\.id))
+        var backup = false
+        if allSelected {
+            guard let selectedBackup = ExportOptionsDialog.chooseMode() else { return }
+            backup = selectedBackup
+        }
         let panel = NSOpenPanel()
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
@@ -81,37 +101,41 @@ final class AppleBooksViewModel {
         panel.prompt = String(localized: "Export Here")
         panel.directoryURL = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first
         guard await panel.begin() == .OK, let destination = panel.url else { return }
+        let overwrite = ExportSettings.overwriteExistingFiles()
+        let concurrencyLimit = ExportSettings.concurrency()
         exportStartedAt = Date()
         defer { exportStartedAt = nil }
         total = items.count
         completed = 0
-        var succeeded = 0
-        // Distinct library items must not silently overwrite each other within a batch.
-        var outputNames: Set<String> = []
-        for book in items {
-            let name = book.exportFilename
+        let selectedIDs = Set(items.map(\.id))
+        let plan = BookExportItem.plan(for: books).filter { selectedIDs.contains($0.book.id) }
+        if backup {
             do {
-                guard outputNames.insert(name.precomposedStringWithCanonicalMapping.lowercased()).inserted else {
-                    throw RepackError.invalid(String(localized: "Duplicate export filename in this batch: \(name)"))
-                }
-                status = String(localized: "Exporting \(completed + 1)/\(total): \(book.title)")
-                _ = try await service.export(book, to: destination, progress: { [weak self] message in
-                    await self?.setExportStatus(message)
-                }) { level, message in
+                status = String(localized: "Cleaning backup destination…")
+                try await service.cleanBackupDestination(destination, items: plan) { level, message in
                     await console.log(level, message)
                 }
-                succeeded += 1
             } catch {
-                console.log("ERROR", String(localized: "\(book.title): \(error.localizedDescription)"))
+                status = error.localizedDescription
+                console.log("ERROR", status)
+                return
             }
-            completed += 1
         }
+        status = String(localized: "Exporting up to \(concurrencyLimit) books at a time…")
+        let summary = await service.exportBatch(plan, to: destination, overwrite: overwrite,
+                                                concurrencyLimit: concurrencyLimit,
+                                                progress: { [weak self] count, message in
+            await self?.setExportProgress(count, message: message)
+        }, log: { level, message in
+            await console.log(level, message)
+        })
         lastExport = destination
-        status = String(localized: "Export: \(succeeded) succeeded · \(total - succeeded) failed.")
+        status = String(localized: "Export: \(summary.succeeded) succeeded · \(summary.skipped) skipped · \(summary.failed) failed.")
         console.log("INFO", status)
     }
 
-    private func setExportStatus(_ message: String) {
+    private func setExportProgress(_ count: Int, message: String) {
+        completed = count
         status = message
     }
 
